@@ -22,12 +22,9 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
     const hasUsername = localStorage.getItem("username");
-  if (
-    !hasUsername &&
-    to.name !== 'Home'
-  ) {
-    return { name: 'Home' }
-  }
-})
+    if (!hasUsername && to.name !== "Home") {
+        return { name: "Home" };
+    }
+});
 
 export default router;

@@ -9,8 +9,8 @@ export default {
         handleButtonClick() {
             localStorage.setItem("username", this.name);
             this.$router.push("lobby");
-        }
-    }
+        },
+    },
 };
 </script>
 <template>
