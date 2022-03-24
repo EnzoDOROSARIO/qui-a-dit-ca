@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "prettier": "prettier --write \"src/**/**.{ts,vue,css}\""
+    "prettier": "prettier --check \"src/**/**.{ts,vue,css}\"",
+    "format": "prettier --write \"src/**/**.{ts,vue,css}\""
   },
   "dependencies": {
     "socket.io-client": "^4.4.1",
