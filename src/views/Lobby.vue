@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, Ref, onMounted } from "vue";
+import { ref, Ref, onMounted, computed, ComputedRef } from "vue";
+import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 interface Player {
@@ -8,15 +9,27 @@ interface Player {
 }
 
 const store = useStore();
+const router = useRouter();
 
 const username = ref(localStorage.getItem("username"));
 const isPlayerReady = ref(false);
 const playerList: Ref<Player[]> = ref([]);
 
+const areAllPlayersReady: ComputedRef<boolean> = computed(() => {
+    let readyCounter = 0;
+
+    playerList.value.forEach((player) => {
+        if (player.isReady === "true") {
+            readyCounter++;
+        }
+    });
+
+    return readyCounter === playerList.value.length;
+});
+
 function setPlayerReadyByUsername(username: string) {
     const newPlayerList = playerList.value;
 
-    console.table(newPlayerList);
     const test = newPlayerList
         .map((player) => player.username)
         .indexOf(username);
@@ -27,8 +40,6 @@ function setPlayerReadyByUsername(username: string) {
     };
 
     playerList.value = newPlayerList;
-
-    console.table(playerList.value);
 }
 
 function handleReadyClick() {
@@ -36,6 +47,10 @@ function handleReadyClick() {
     isPlayerReady.value = true;
 
     setPlayerReadyByUsername(username.value!);
+}
+
+function handlePlayClick() {
+    store.state.socket.emit("launch game");
 }
 
 onMounted(() => {
@@ -46,12 +61,15 @@ onMounted(() => {
     });
 
     store.state.socket.on("player joined", (player: Player) => {
-        console.log("new player joined");
         playerList.value.push(player);
     });
 
     store.state.socket.on("new player ready", (username: string) => {
         setPlayerReadyByUsername(username);
+    });
+
+    store.state.socket.on("game launched", () => {
+        router.push("game");
     });
 });
 </script>
@@ -83,13 +101,24 @@ onMounted(() => {
 
     <div class="mt-10 w-full text-center absolute bottom-10">
         <button
+            v-if="areAllPlayersReady"
+            class="bg-purple-600 text-white py-3 text-md rounded w-1/3 hover:bg-purple-800 disabled:bg-gray-300 disabled:text-slate-400"
+            @click="handlePlayClick"
+        >
+            Lancer la GAME
+        </button>
+        <button
+            v-else
             class="bg-purple-600 text-white py-3 text-md rounded w-1/3 hover:bg-purple-800 disabled:bg-gray-300 disabled:text-slate-400"
             @click="handleReadyClick"
             :disabled="isPlayerReady"
         >
             Je suis ready
         </button>
-        <p class="text-slate-400 text-xs" v-if="isPlayerReady">
+        <p
+            class="text-slate-400 text-xs"
+            v-if="isPlayerReady && !areAllPlayersReady"
+        >
             T'es bien ready bg
         </p>
     </div>
