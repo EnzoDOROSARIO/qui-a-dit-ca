@@ -1,17 +1,18 @@
-<script lang="ts">
-export default {
-    data() {
-        return {
-            name: "",
-        };
-    },
-    methods: {
-        handleButtonClick() {
-            localStorage.setItem("username", this.name);
-            this.$router.push("lobby");
-        },
-    },
-};
+<script setup lang="ts">
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+
+const store = useStore();
+const router = useRouter();
+
+const name = ref("");
+
+function handleButtonClick() {
+    localStorage.setItem("username", name.value);
+    store.state.socket.emit("new player", name.value);
+    router.push("lobby");
+}
 </script>
 <template>
     <div class="flex items-center justify-center h-screen">
